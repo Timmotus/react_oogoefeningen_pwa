@@ -1,5 +1,32 @@
-/* needs beautifying */
+.nav-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0% 12.5%;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    overflow: hidden;
+    background-color: hsl(16, 72%, 50%);
+}
 
-.nav-container * {
-    color: white;
+.nav-item {
+    float: left;
+    width: 25%;
+    border-left: .15em solid black;
+}
+
+.nav-item:hover {
+    background-color: hsl(16, 65%, 58%);
+}
+
+.nav-item:first-child {
+    border-left: none;
+}
+
+.nav-link {
+    display: block;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+    padding: 1em;
 }
