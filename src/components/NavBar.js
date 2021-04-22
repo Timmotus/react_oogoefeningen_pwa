@@ -12,13 +12,13 @@ export default class NavBar extends React.Component {
                 <nav>
                     <ul className="nav-list">
                         <li className="nav-item">
-                            <Link className="nav-link" to="/">Home</Link>
+                            <Link className="nav-link" to="/">Profiel</Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/page1">page1</Link>
+                            <Link className="nav-link" to="/page1">Oefening</Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/page2">page2</Link>
+                            <Link className="nav-link" to="/page2">Vragen</Link>
                         </li>
                     </ul>
                 </nav>

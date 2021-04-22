@@ -6,8 +6,10 @@ import {
 } from "react-router-dom";
 
 import './App.css';
-import NavBar from './NavBar';
-import Weather from './Weather';
+import Camera from './components/Camera';
+import NavBar from './components/NavBar';
+import Weather from './components/Weather';
+import Home from './components/Home';
 
 export default class App extends React.Component {
     render() {
@@ -16,9 +18,9 @@ export default class App extends React.Component {
                 <Router>
                     <NavBar />
                     <Switch>
-                        <Route exact path="/" render={() => <h1>Welcome!</h1>} />
+                        <Route exact path="/" component={Home} />
                         <Route exact path="/page1" component={Weather} />
-                        <Route exact path="/page2" render={() => <h1>pagina2</h1>} />
+                        <Route exact path="/page2" component={Camera} />
                     </Switch>
                 </Router>
             </div>
