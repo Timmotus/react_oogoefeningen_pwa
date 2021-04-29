@@ -8,7 +8,7 @@ const Home = () => {
             <img src={'./assets/face_phone.png'} alt=""/>
             <h1>Welkom!</h1>
             <span>Er staan oefeningen voor je klaar!</span>
-            <button><i className="material-icons">play_arrow</i>Start<i></i></button>
+            <button><i className="material-icons">play_arrow</i>Start<i/></button>
         </div>
     );
 }
