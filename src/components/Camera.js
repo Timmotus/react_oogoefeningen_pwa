@@ -1,9 +1,12 @@
 import React, { useEffect, useRef } from "react";
+import * as faceTracking from '../api/faceTracking';
 
 const Camera = () => {
     const videoRef = useRef(null);
     const photoRef = useRef(null);
     const stripRef = useRef(null);
+    
+    let faceTrackingInitPromise = faceTracking.initialize();
 
     useEffect(() => {
         getVideo();
@@ -11,7 +14,7 @@ const Camera = () => {
 
     const getVideo = () => {
         navigator.mediaDevices
-            .getUserMedia({ video: { width: 300 } })
+            .getUserMedia({ video: { width: 640 } })
             .then(stream => {
                 let video = videoRef.current;
                 video.srcObject = stream;
@@ -27,14 +30,18 @@ const Camera = () => {
         let photo = photoRef.current;
         let ctx = photo.getContext("2d");
 
-        const width = 320;
-        const height = 240;
+        const width = 640;
+        const height = 480;
         photo.width = width;
         photo.height = height;
 
-        return setInterval(() => {
+        // Waits for the promise of the initialization, and then creates the interval
+        faceTrackingInitPromise.then(() => setInterval(async () => {
             ctx.drawImage(video, 0, 0, width, height);
-        }, 200);
+
+            await faceTracking.update(ctx.getImageData(0, 0, photo.width, photo.height));
+            ctx.putImageData(faceTracking.drawDebugImage(), 0, 0); // Overlay the image that got rendered
+        }, 50));
     };
 
     const takePhoto = () => {
