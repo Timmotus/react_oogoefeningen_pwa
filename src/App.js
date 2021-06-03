@@ -12,6 +12,7 @@ import Home from './components/Home';
 import InfoPage from "./components/InfoPage";
 import Exercise from "./components/Exercise";
 import Progress from "./components/Progress";
+import Account from "./components/Account";
 
 export default class App extends React.Component {
     render() {
@@ -25,6 +26,8 @@ export default class App extends React.Component {
                         <Route exact path="/progress" component={Progress} />
                         <Route exact path="/page1" component={Weather} />
                         <Route exact path="/page2" component={Camera} />
+                        <Route exact path="/register" component={Account} />
+                        <Route exact path="/login" component={Account} />
                     </Switch>
                 </Router>
             </div>
