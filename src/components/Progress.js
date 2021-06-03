@@ -11,13 +11,13 @@ const Progress = () => {
                 <h1>14 cm</h1>
             </div>
             <div className="progress-new">
-                <span>Oud</span>
+                <span>Nieuw</span>
                 <h1>12,9 cm</h1>
             </div>
             <div className="progress-improve">
                 <span>Verbetering</span>
                 <h1>-1,1 cm</h1>
-                <button>Volgende</button>
+                <button onClick={() => window.location.href = '/'}>Volgende</button>
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import "materialize-css";
+import M from "materialize-css";
 import {Carousel} from "react-materialize";
 import "./InfoPage.css";
 
@@ -38,13 +38,13 @@ export default class InfoPage extends Component {
                     </div>
                 </Carousel>
                 <div className="carousel-controls">
-                    <span>Overslaan</span>
+                    <span onClick={() => window.location.href = '/'}>Overslaan</span>
                     <div className="indicators" style={{opacity: 0}}>
                         <div className='indicator'/>
                         <div className='indicator'/>
                         <div className='indicator'/>
                     </div>
-                    <span>Volgende</span>
+                    <span onClick={() => { M.Carousel.getInstance(document.querySelector('#info-carousel')).next() }}>Volgende</span>
                 </div>
             </div>
         );

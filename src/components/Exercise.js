@@ -8,8 +8,8 @@ const Excercise = () => {
             <h1>Klaar!</h1>
             <span>Voortgang zien?</span>
             <div className="exercise-buttons">
-                <button>Ja</button>
-                <button>Nee</button>
+                <button onClick={() => window.location.href = '/progress'}>Ja</button>
+                <button onClick={() => window.location.href = '/'}>Nee</button>
             </div>
         </div>
     );
