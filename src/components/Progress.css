@@ -1,0 +1,70 @@
+.progress-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-content: center;
+    align-items: center;
+
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    background-color: transparent;
+}
+
+.progress-container h1 {
+    margin: 0 auto 1em;
+    font-size: 10vw;
+    font-weight: normal;
+}
+
+.progress-container span {
+    margin: 0 1em;
+    font-size: 8vw;
+}
+
+.progress-container button {
+    display: block;
+    text-align: center;
+    width: 40vw;
+
+    color: #fff;
+    font-size: 8vw;
+    padding: .2em;
+    margin: .3em auto 0;
+
+    border: none;
+    border-radius: .3em;
+    box-shadow: 0 .1em #0f212a;
+    background-color: #1b3642;
+    transition: .2s;
+}
+
+.exercise-container button:hover {
+    cursor: pointer;
+    background-color: #294e5e;
+}
+
+.exercise-container button:active {
+    cursor: pointer;
+    box-shadow: none;
+    transition: 0s;
+    transform: translateY(10%) scale(0.95);
+    background-color: #294e5e;
+}
+
+.progress-container .progress-old {
+    padding-top: 3em;
+    height: 100%;
+    background-color: red;
+}
+
+.progress-container .progress-new {
+    padding-top: 3em;
+    height: 100%;
+    background-color: orange;
+}
+
+.progress-container .progress-improve {
+    padding-top: 3em;
+    height: 100%;
+    background-color: green;
+}

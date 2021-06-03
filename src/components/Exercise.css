@@ -1,4 +1,4 @@
-.home-container {
+.exercise-container {
     display: grid;
     grid-template-columns: 1fr;
     justify-content: center;
@@ -10,46 +10,31 @@
     background-color: transparent;
 }
 
-.home-container h1 {
+.exercise-container h1 {
     margin: 0 auto;
     font-size: 15vw;
     font-weight: normal;
 }
 
-.wait h1 {
-    margin: 0 1em;
-    font-size: 15vw;
-    font-weight: normal;
-}
-
-.home-container img {
-    max-width: 40vh;
-    width: 40vh;
-}
-
-.home-container .smaller {
-    width: 5em;
-    height: 40vh;
-    object-position: 0 0;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-}
-
-.home-container span {
+.exercise-container span {
     margin: 0 1em;
     font-size: 8vw;
 }
 
-.home-container button {
+.exercise-buttons {
     display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-columns: 1fr 1fr;
     justify-content: center;
     align-items: center;
-    width: 70vw;
+}
+
+.exercise-container button {
+    display: block;
+    text-align: center;
+    width: 30vw;
 
     color: #fff;
-    font-size: 12vw;
+    font-size: 8vw;
     padding: .2em;
     margin: .3em auto 0;
 
@@ -60,30 +45,15 @@
     transition: .2s;
 }
 
-.home-container button:hover {
+.exercise-container button:hover {
     cursor: pointer;
     background-color: #294e5e;
 }
 
-.home-container button:active {
+.exercise-container button:active {
     cursor: pointer;
     box-shadow: none;
     transition: 0s;
     transform: translateY(10%) scale(0.95);
     background-color: #294e5e;
-}
-
-.home-container button i {
-    font-size: 3rem;
-}
-
-.icon {
-    font-size: 5vh;
-    position: absolute;
-    top: .5em;
-    right: .5em;
-}
-
-.icon-2 {
-    top: 2em;
 }
