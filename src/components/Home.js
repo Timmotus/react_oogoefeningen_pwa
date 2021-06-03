@@ -27,7 +27,6 @@ const Home = () => {
                 <span>Nog {time}s Wachten</span>
                 <h1>Lekker bezig!</h1>
                 <span>Als de timer klaar is kan je weer oefenen!</span>
-                <button onClick={() => window.location.href = '/info'}><i className="material-icons">person</i>Profiel<i/></button>
                 <NavBar/>
             </div>
         );
