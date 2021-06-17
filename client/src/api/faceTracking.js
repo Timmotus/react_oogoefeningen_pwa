@@ -164,6 +164,15 @@ export const calibrateDistance = async () => {
     return true;
 }
 
+export const getDistanceInCm = () => {
+    return 30;
+}
+
+export const isLookingCrossEyed = () => {
+    // todo: See if cross-eyed component is actually feasible enough to stop the tracking
+    return false;
+}
+
 let debugCanvas = document.createElement("canvas");
 let ctx = debugCanvas.getContext("2d");
 
