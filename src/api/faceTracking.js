@@ -70,12 +70,12 @@ export const isInitialized = () => {
 
 // Method is asynchronous so that you can fetch the data using the getters later when the promise is fullfilled
 export const update = async (imageData) => {
-    lastImageTracking.successful = false;
     lastImage.width = imageData.width;
     lastImage.height = imageData.height;
     lastImage.data = imageData;
     if (!initialized) {
         console.error("faceTracking has not been (fully) initialized yet, which you should do before trying to update the image!");
+        lastImageTracking.successful = false;
         return false;
     }
     // For faceapi.js (facial feature tracking), the input needs to be passed as an tf.tensor3d
@@ -85,65 +85,74 @@ export const update = async (imageData) => {
     inputTensor.dispose();
     if (!faceLandmarksResults) {
         console.debug("No face was detected by the faceapi.js library!");
+        lastImageTracking.successful = false;
         return false;
     }
 
-    // For lploc (pupil tracking), the input needs to be turned into a grayscale image
-    let picoImage = {
-        pixels: picoHelper.rgba_to_grayscale(imageData),
-        nrows: imageData.height,
-        ncols: imageData.width,
-        ldim: imageData.width,
-    };
-    let params = {
-        "shiftfactor": 0.1, // move the detection window by 10% of its size
-        "minsize": 100,     // minimum size of a face
-        "maxsize": 1000,    // maximum size of a face
-        "scalefactor": 1.1  // for multiscale processing: resize the detection window by 10% when moving to the higher scale
-    }
-    let dets = pico.pico.run_cascade(picoImage, picoHelper.facefinder_classify_region, params);
-    dets = picoHelper.update_memory(dets);
-    dets = pico.pico.cluster_detections(dets, 0.3);
-    let bestDet = dets[0];
-    if (dets.length > 1) {
-        //console.debug("More then one face was detected, which might make it so that faceapi.js tracks a different face then lploc");
-        for (let i=0; i<dets.length; i++) {
-            if (bestDet[3] < dets[i][3]) {
-                bestDet = dets[i];
+    let pupilTracking = true;
+    let bestDet = null;
+    if (pupilTracking) {
+        // For lploc (pupil tracking), the input needs to be turned into a grayscale image
+        let picoImage = {
+            pixels: picoHelper.rgba_to_grayscale(imageData),
+            nrows: imageData.height,
+            ncols: imageData.width,
+            ldim: imageData.width,
+        };
+        let params = {
+            "shiftfactor": 0.1, // move the detection window by 10% of its size
+            "minsize": 100,     // minimum size of a face
+            "maxsize": 1000,    // maximum size of a face
+            "scalefactor": 1.1  // for multiscale processing: resize the detection window by 10% when moving to the higher scale
+        }
+        let dets = pico.pico.run_cascade(picoImage, picoHelper.facefinder_classify_region, params);
+        dets = picoHelper.update_memory(dets);
+        dets = pico.pico.cluster_detections(dets, 0.3);
+        bestDet = dets[0];
+        if (dets.length > 1) {
+            //console.debug("More then one face was detected, which might make it so that faceapi.js tracks a different face then lploc");
+            for (let i=0; i<dets.length; i++) {
+                if (bestDet[3] < dets[i][3]) {
+                    bestDet = dets[i];
+                }
             }
         }
-    }
-    else if (dets.length === 0) {
-        console.debug("No face was detected by the lploc algorithm!");
-        return false;
-    }
-    
-    if (bestDet[3] <= 50.0) {
-        console.debug("Couldn't detect reliable faces from lploc!");
-        return false;
-    }
-
-    // Left pupil tracking
-    {
-        let x = bestDet[0] - 0.075 * bestDet[2];
-        let y = bestDet[1] - 0.175 * bestDet[2];
-        let scale = 0.35 * bestDet[2];
-        lastImageTracking.leftEye.pupil = vec2.fromValues(...picoHelper.do_puploc(x, y, scale, 63, picoImage));
-        if (lastImageTracking.leftEye.pupil[0] < 0 || lastImageTracking.leftEye.pupil[1] < 0) {
-            console.debug("Couldn't detect a (reliable) left pupil!");
+        else if (dets.length === 0) {
+            console.debug("No face was detected by the lploc algorithm!");
+            lastImageTracking.successful = false;
             return false;
         }
-    }
-    
-    // Right pupil tracking
-    {
-        let x = bestDet[0] - 0.075 * bestDet[2];
-        let y = bestDet[1] + 0.175 * bestDet[2];
-        let scale = 0.35 * bestDet[2];
-        lastImageTracking.rightEye.pupil = vec2.fromValues(...picoHelper.do_puploc(x, y, scale, 63, picoImage));
-        if (lastImageTracking.rightEye.pupil[0] < 0 || lastImageTracking.rightEye.pupil[1] < 0) {
-            console.debug("Couldn't detect a (reliable) right pupil!");
+        
+        if (bestDet[3] <= 50.0) {
+            console.debug("Couldn't detect reliable faces from lploc!");
+            lastImageTracking.successful = false;
             return false;
+        }
+
+        // Left pupil tracking
+        {
+            let x = bestDet[0] - 0.075 * bestDet[2];
+            let y = bestDet[1] - 0.175 * bestDet[2];
+            let scale = 0.35 * bestDet[2];
+            lastImageTracking.leftEye.pupil = vec2.fromValues(...picoHelper.do_puploc(x, y, scale, 63, picoImage));
+            if (lastImageTracking.leftEye.pupil[0] < 0 || lastImageTracking.leftEye.pupil[1] < 0) {
+                console.debug("Couldn't detect a (reliable) left pupil!");
+                lastImageTracking.successful = false;
+                return false;
+            }
+        }
+        
+        // Right pupil tracking
+        {
+            let x = bestDet[0] - 0.075 * bestDet[2];
+            let y = bestDet[1] + 0.175 * bestDet[2];
+            let scale = 0.35 * bestDet[2];
+            lastImageTracking.rightEye.pupil = vec2.fromValues(...picoHelper.do_puploc(x, y, scale, 63, picoImage));
+            if (lastImageTracking.rightEye.pupil[0] < 0 || lastImageTracking.rightEye.pupil[1] < 0) {
+                console.debug("Couldn't detect a (reliable) right pupil!");
+                lastImageTracking.successful = false;
+                return false;
+            }
         }
     }
 
@@ -160,10 +169,12 @@ export const update = async (imageData) => {
     }
 
     lastImageTracking.successful = true;
-    lastImageTracking.boundingBox.lploc[0] = bestDet[1] - (bestDet[2] * 0.5);
-    lastImageTracking.boundingBox.lploc[1] = bestDet[0] - (bestDet[2] * 0.5);
-    lastImageTracking.boundingBox.lploc[2] = bestDet[2];
-    lastImageTracking.boundingBox.lploc[3] = bestDet[2];
+    if (pupilTracking) {
+        lastImageTracking.boundingBox.lploc[0] = bestDet[1] - (bestDet[2] * 0.5);
+        lastImageTracking.boundingBox.lploc[1] = bestDet[0] - (bestDet[2] * 0.5);
+        lastImageTracking.boundingBox.lploc[2] = bestDet[2];
+        lastImageTracking.boundingBox.lploc[3] = bestDet[2];
+    }
 
     lastImageTracking.boundingBox.faceapi[0] = faceLandmarksResults.detection.box.x;
     lastImageTracking.boundingBox.faceapi[1] = faceLandmarksResults.detection.box.y;
@@ -202,7 +213,7 @@ export const calibrateDistance = () => {
     }
 
     if (!isCentered()) {
-        console.error("Can't calibrate when the last image was not centered!");
+        console.error("Calibrating when the last image was not centered!");
     }
 
     calibratedConversionRatio = getDistanceBetweenEyesInPixels();
@@ -217,26 +228,29 @@ export const recalibrate = () => {
 
 export const isCentered = () => {
     if (!lastImageTracking.successful) {
+        console.error("Requested whether the last frame was centered but it didn't track successfully");
         return false;
     }
 
     // Return if the right eye is left from the left eye (camera is likely upside down)
     if (lastImageTracking.leftEye.x >= lastImageTracking.rightEye.x) {
+        console.error("Camera is likely upside down");
         return false;
     }
 
-    let tolerancePercentageX = lastImage.width/5;
-    let tolerancePercentageY = lastImage.height/5;
+    let tolerancePercentageX = lastImage.width/6;
+    let tolerancePercentageY = lastImage.height/6;
 
-    let middlePointX = (lastImageTracking.boundingBox.faceapi[0] + lastImageTracking.boundingBox.faceapi[2]) / 2;
-    let middlePointY = (lastImageTracking.boundingBox.faceapi[1] + lastImageTracking.boundingBox.faceapi[3]) / 2;
-    if (Math.abs(middlePointX - (lastImage.width/2)) > tolerancePercentageX) {
-        console.error("Head fell outside of center: X axis middle was "+Math.abs(middlePointX - (lastImage.width/2)).toString()+", but tolerence is " + tolerancePercentageX.toString());
+    let middlePointX = lastImageTracking.boundingBox.faceapi[0] + (lastImageTracking.boundingBox.faceapi[2]/2);
+    let middlePointY = lastImageTracking.boundingBox.faceapi[1] + (lastImageTracking.boundingBox.faceapi[3]/2);
+
+    if (!(((lastImage.width/2)-tolerancePercentageX) < middlePointX && ((lastImage.width/2)+tolerancePercentageX) > middlePointX)) {
+        console.error("Head fell outside of center: X axis middle was "+((lastImage.width/2) - middlePointX).toString()+", but tolerence is " + tolerancePercentageX.toString());
         return false;
     }
 
-    if (Math.abs(middlePointY - (lastImage.height/2)) > tolerancePercentageY) {
-        console.error("Head fell outside of center: Y axis middle was "+Math.abs(middlePointY - (lastImage.height/2)).toString()+", but tolerence is " + tolerancePercentageY.toString());
+    if (!(((lastImage.height/2)-tolerancePercentageY) < middlePointY && ((lastImage.height/2)+tolerancePercentageY) > middlePointY)) {
+        console.error("Head fell outside of center: Y axis middle was "+Math.abs((lastImage.height/2) - middlePointY).toString()+", but tolerence is " + tolerancePercentageY.toString());
         return false;
     }
 

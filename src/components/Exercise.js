@@ -39,6 +39,7 @@ export default class Exercise extends Component {
         canvasElem.height = height;
 
         canvasContext.drawImage(videoElem, 0, 0, width, height);
+        let pixelDataBeforeOverlay = canvasContext.getImageData(0, 0, width, height);
         if (document.getElementById("step1")) {
             if (!document.getElementById("step1").hidden) {
                 canvasContext.drawImage(faceTracking.isCentered() ? overlayImageGreen : overlayImageGray, (width/2) - (faceBorderWidth/2), (height/2) - (faceBorderHeight/2), faceBorderWidth, faceBorderHeight);
@@ -46,10 +47,11 @@ export default class Exercise extends Component {
             }
             else if (!faceTracking.isCentered()) canvasContext.drawImage(overlayImageGray, (width/2) - (faceBorderWidth/2), (height/2) - (faceBorderHeight/2), faceBorderWidth, faceBorderHeight);
         }
-        faceTracking.update(canvasContext.getImageData(0, 0, width, height)).then(matchedFace => {
+        faceTracking.update(pixelDataBeforeOverlay).then(matchedFace => {
+            //canvasContext.putImageData(faceTracking.drawDebugImage(), 0, 0);
             if (!document.getElementById("step1")) {
                 document.getElementById("headObscuredWarning").style.opacity = matchedFace ? "0.0" : "1.0";
-                document.getElementById("headPositionWarning").style.opacity = faceTracking.isCentered() ? "0.0" : "1.0";
+                if (matchedFace) document.getElementById("headPositionWarning").style.opacity = faceTracking.isCentered() ? "0.0" : "1.0";
             }
         });
     }
