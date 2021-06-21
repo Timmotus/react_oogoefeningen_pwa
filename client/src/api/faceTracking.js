@@ -4,7 +4,9 @@ const pico = require("picojs");
 const vec2 = require("gl-vec2");
 
 let medianDifferentiating = new cyclist(2000);
-let initialized = false;
+export let initialized = false;
+export let calibrated = false;
+let calibratedConversionRatio = null;
 
 let lastImage = {
     width: null,
@@ -46,6 +48,9 @@ let picoHelper = {
 };
 
 export const initialize = async () => {
+    calibrated = window.localStorage.getItem("calibrated-conversion-ratio") != null && parseFloat(window.localStorage.getItem("calibrated-conversion-ratio")) != NaN;
+    calibratedConversionRatio = window.localStorage.getItem("calibrated-conversion-ratio") == null ? 0 : parseFloat(window.localStorage.getItem("calibrated-conversion-ratio"));
+
     await faceapi.nets.ssdMobilenetv1.loadFromUri("/assets/weights");
     await faceapi.nets.faceLandmark68Net.loadFromUri("/assets/weights");
     
@@ -57,6 +62,10 @@ export const initialize = async () => {
     });
     console.info("faceTracking has been successfully initialized");
     initialized = true;
+}
+
+export const isInitialized = () => {
+    return initialized;
 }
 
 // Method is asynchronous so that you can fetch the data using the getters later when the promise is fullfilled
@@ -138,6 +147,18 @@ export const update = async (imageData) => {
         }
     }
 
+    // Left eye sides tracking
+    {
+        lastImageTracking.leftEye.leftSide = vec2.fromValues(faceLandmarksResults.landmarks.getLeftEye()[0].x, faceLandmarksResults.landmarks.getLeftEye()[0].y);
+        lastImageTracking.leftEye.rightSide = vec2.fromValues(faceLandmarksResults.landmarks.getLeftEye()[3].x, faceLandmarksResults.landmarks.getLeftEye()[3].y);
+    }
+
+    // Right eye sides tracking
+    {
+        lastImageTracking.rightEye.leftSide = vec2.fromValues(faceLandmarksResults.landmarks.getRightEye()[0].x, faceLandmarksResults.landmarks.getRightEye()[0].y);
+        lastImageTracking.rightEye.rightSide = vec2.fromValues(faceLandmarksResults.landmarks.getRightEye()[3].x, faceLandmarksResults.landmarks.getRightEye()[3].y);
+    }
+
     lastImageTracking.successful = true;
     lastImageTracking.boundingBox.lploc[0] = bestDet[1] - (bestDet[2] * 0.5);
     lastImageTracking.boundingBox.lploc[1] = bestDet[0] - (bestDet[2] * 0.5);
@@ -152,25 +173,73 @@ export const update = async (imageData) => {
     return true;
 }
 
-// calibrates the distance
-export const calibrateDistance = async () => {
-    if (!lastImageTracking.successful) {
-        console.error("Can't calibrate when the image hasn't been updated or if the last update was unsuccessful during tracking!");
-        return false;
-    }
+export const isCalibrated = () => {
+    return calibrated;
+}
 
-    // use localstorage to restore previous calibrated data
-
-    return true;
+export const isLastUpdateSuccessful = () => {
+    return lastImageTracking.successful;
 }
 
 export const getDistanceInCm = () => {
-    return 30;
+    return (50.0/getDistanceBetweenEyesInPixels()) * calibratedConversionRatio;
 }
 
 export const isLookingCrossEyed = () => {
     // todo: See if cross-eyed component is actually feasible enough to stop the tracking
     return false;
+}
+
+function getDistanceBetweenEyesInPixels() {
+    return vec2.dist(lastImageTracking.leftEye.leftSide, lastImageTracking.rightEye.rightSide);
+}
+
+// calibrates the distance
+export const calibrateDistance = () => {
+    if (!lastImageTracking.successful) {
+        console.error("Can't calibrate when the image hasn't been updated or if the last update was unsuccessful during tracking!");
+        return false;
+    }
+
+    if (!isCentered()) {
+        console.error("Can't calibrate when the last image was not centered!");
+    }
+
+    calibratedConversionRatio = getDistanceBetweenEyesInPixels();
+    window.localStorage.setItem("calibrated-conversion-ratio", calibratedConversionRatio.toString());
+    return true;
+}
+
+export const recalibrate = () => {
+    window.localStorage.removeItem("calibrated-conversion-ratio");
+    calibrated = false;
+}
+
+// todo: fix this very inaccurate code! Works but it's extremely picky.
+// Could calculate middle point of head points and then check how far it is from the middle of the frame
+export const isCentered = () => {
+    if (!lastImageTracking.successful) {
+        return false;
+    }
+
+    // Return if the right eye is left from the left eye (camera is likely upside down)
+    if (lastImageTracking.leftEye.x >= lastImageTracking.rightEye.x) {
+        return false;
+    }
+
+    let marginLeft = lastImageTracking.leftEye.pupil[0];
+    let marginRight = lastImage.width - lastImageTracking.rightEye.pupil[0];
+    let marginUp = lastImageTracking.leftEye.pupil[1];
+    let marginDown = lastImage.height - lastImageTracking.rightEye.pupil[1];
+
+    let marginToleranceX = lastImage.width / 4;
+    let marginToleranceY = lastImage.height / 4;
+
+    if (Math.abs(marginRight - marginLeft) < marginToleranceX && Math.abs(marginDown - marginUp) < marginToleranceY) return true;
+    else {
+        console.log(Math.abs(marginRight - marginLeft), marginToleranceX, Math.abs(marginDown - marginUp), marginToleranceY);
+        return false;
+    }
 }
 
 let debugCanvas = document.createElement("canvas");
