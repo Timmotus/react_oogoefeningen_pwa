@@ -87,8 +87,9 @@ export default class Exercise extends Component {
             console.log("Finished exercise!");
             const dist = faceTracking.getDistanceInCm();
 
-            this.addHistory(dist);
-            window.location.href = "/progress?data=" + dist;
+            this.addHistory(dist).finally(() => {
+                window.location.href = "/progress?data=" + dist;
+            });
         }
     }
 
