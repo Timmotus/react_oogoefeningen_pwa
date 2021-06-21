@@ -3,6 +3,7 @@ import M from "materialize-css";
 import * as materialize from "react-materialize";
 import "./Exercise.css";
 import * as faceTracking from "./../api/faceTracking";
+import {get, set} from "idb-keyval";
 
 export default class Exercise extends Component {  
     video = null;
@@ -67,11 +68,25 @@ export default class Exercise extends Component {
         }
     }
 
+    async addHistory (dist) {
+        const history = await get('history');
+        history.results.push(
+            {
+                date_time: new Date().toLocaleString(),
+                data: dist
+            }
+        );
+        await set("history", history);
+    }
+
     finishExercise() {
         if (faceTracking.isCentered()/* && faceTracking.isLastUpdateSuccessful()*/) {
             // todo: check if the last result was valid
             console.log("Finished exercise!");
-            window.location.href = "/progress?data=" + faceTracking.getDistanceInCm();
+            const dist = faceTracking.getDistanceInCm();
+
+            this.addHistory(dist);
+            window.location.href = "/progress?data=" + dist;
         }
     }
 
