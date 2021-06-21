@@ -215,8 +215,6 @@ export const recalibrate = () => {
     calibrated = false;
 }
 
-// todo: fix this very inaccurate code! Works but it's extremely picky.
-// Could calculate middle point of head points and then check how far it is from the middle of the frame
 export const isCentered = () => {
     if (!lastImageTracking.successful) {
         return false;
@@ -227,19 +225,22 @@ export const isCentered = () => {
         return false;
     }
 
-    let marginLeft = lastImageTracking.leftEye.pupil[0];
-    let marginRight = lastImage.width - lastImageTracking.rightEye.pupil[0];
-    let marginUp = lastImageTracking.leftEye.pupil[1];
-    let marginDown = lastImage.height - lastImageTracking.rightEye.pupil[1];
+    let tolerancePercentageX = lastImage.width/5;
+    let tolerancePercentageY = lastImage.height/5;
 
-    let marginToleranceX = lastImage.width / 4;
-    let marginToleranceY = lastImage.height / 4;
-
-    if (Math.abs(marginRight - marginLeft) < marginToleranceX && Math.abs(marginDown - marginUp) < marginToleranceY) return true;
-    else {
-        console.log(Math.abs(marginRight - marginLeft), marginToleranceX, Math.abs(marginDown - marginUp), marginToleranceY);
+    let middlePointX = (lastImageTracking.boundingBox.faceapi[0] + lastImageTracking.boundingBox.faceapi[2]) / 2;
+    let middlePointY = (lastImageTracking.boundingBox.faceapi[1] + lastImageTracking.boundingBox.faceapi[3]) / 2;
+    if (Math.abs(middlePointX - (lastImage.width/2)) > tolerancePercentageX) {
+        console.error("Head fell outside of center: X axis middle was "+Math.abs(middlePointX - (lastImage.width/2)).toString()+", but tolerence is " + tolerancePercentageX.toString());
         return false;
     }
+
+    if (Math.abs(middlePointY - (lastImage.height/2)) > tolerancePercentageY) {
+        console.error("Head fell outside of center: Y axis middle was "+Math.abs(middlePointY - (lastImage.height/2)).toString()+", but tolerence is " + tolerancePercentageY.toString());
+        return false;
+    }
+
+    return true;
 }
 
 let debugCanvas = document.createElement("canvas");

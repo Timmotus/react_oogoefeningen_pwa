@@ -18,7 +18,7 @@ export default class Exercise extends Component {
 
     initializeTrackingVideo() {
         this.trackingInitPromise.then(() => {
-            this.timer = setInterval(this.updateTrackingVideo, 200);
+            this.timer = setInterval(this.updateTrackingVideo, 50);
         });
     }
 
@@ -39,20 +39,16 @@ export default class Exercise extends Component {
 
         canvasContext.drawImage(videoElem, 0, 0, width, height);
         if (document.getElementById("step1")) {
-            if (!document.getElementById("step1").hidden) canvasContext.drawImage(faceTracking.isCentered() ? overlayImageGreen : overlayImageGray, (width/2) - (faceBorderWidth/2), (height/2) - (faceBorderHeight/2), faceBorderWidth, faceBorderHeight);
+            if (!document.getElementById("step1").hidden) {
+                canvasContext.drawImage(faceTracking.isCentered() ? overlayImageGreen : overlayImageGray, (width/2) - (faceBorderWidth/2), (height/2) - (faceBorderHeight/2), faceBorderWidth, faceBorderHeight);
+                console.log(faceTracking.isCentered());
+            }
             else if (!faceTracking.isCentered()) canvasContext.drawImage(overlayImageGray, (width/2) - (faceBorderWidth/2), (height/2) - (faceBorderHeight/2), faceBorderWidth, faceBorderHeight);
         }
         faceTracking.update(canvasContext.getImageData(0, 0, width, height)).then(matchedFace => {
             if (!document.getElementById("step1")) {
                 document.getElementById("headObscuredWarning").style.opacity = matchedFace ? "0.0" : "1.0";
                 document.getElementById("headPositionWarning").style.opacity = faceTracking.isCentered() ? "0.0" : "1.0";
-            }
-            if (matchedFace) {
-                this.lastDistanceInCMs = faceTracking.getDistanceInCm();
-                console.debug("Current distance between camera is ", this.lastDistanceInCMs, this.stopExerciseOnNextUpdate);
-            }
-            else {
-                this.lastDistanceInCMs = null;
             }
         });
     }
@@ -91,7 +87,7 @@ export default class Exercise extends Component {
             return (
                 <div className="exercise-container">
                     <h2>Calibratie Stap</h2>
-                    <div id="faceTracking">
+                    <div id="faceTracking" style={{height: "30em"}}>
                         <img id="calibrationFaceBorderGray" src="/assets/face-border-gray.svg" hidden></img>
                         <img id="calibrationFaceBorderGreen" src="/assets/face-border-green.svg" hidden></img>
                         <video id="calibrationVideo" onCanPlay={() => this.initializeTrackingVideo()} hidden></video>
@@ -143,7 +139,7 @@ export default class Exercise extends Component {
         if (!navigator.mediaDevices) {
             alert("User didn't give access to the camera!");
         }
-        navigator.mediaDevices.getUserMedia({ video: { width: 640 } }).then(stream => {
+        navigator.mediaDevices.getUserMedia({ video: { height: this.video.parentElement.height, width: this.video.parentElement.width, facingMode: "user" } }).then(stream => {
             this.video.srcObject = stream;
             this.video.play();
         })
