@@ -87,7 +87,14 @@ export default class Exercise extends Component {
             console.log("Finished exercise!");
             const dist = faceTracking.getDistanceInCm();
 
-            this.addHistory(dist).finally(() => {
+            this.addHistory(dist).then(() => {
+                // get('exersiceId').then(value => {
+                //     fetch('https://oogzorg-backend.herokuapp.com/api/result', {
+                //         method: 'POST',
+                //         body: JSON.stringify({exerciseId: value, date: Date.toLocaleString(), cm: dist})
+                //     });
+                // });
+            }).finally(() => {
                 window.location.href = "/progress?data=" + dist;
             });
         }
