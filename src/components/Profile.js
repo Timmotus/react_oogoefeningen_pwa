@@ -34,8 +34,10 @@ const Profile = () => {
         <div className="profile-container">
             <h1>Profiel</h1>
             <span>Geen koppel-code in gebruik.</span>
-            <button onClick={() => { }}>Ontvang koppel-code</button>
-
+            <button onClick={ () => {
+                fetch('https://localhost:8080/api/result', { method: 'POST', body: JSON.stringify({exerciseId: '123', date: '01/01/2021 12:10:30', cm: 5.0})})
+                    .then(response => console.log(response));
+            }}>Ontvang koppel-code</button>
             <h1>Resultaten</h1>
             {history_render()}
             <NavBar/>
