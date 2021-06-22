@@ -1,12 +1,14 @@
-const cyclist = require("cyclist");
+const CBuffer = require("CBuffer");
 const faceapi = require("face-api.js");
 const pico = require("picojs");
 const vec2 = require("gl-vec2");
 
-let medianDifferentiating = new cyclist(2000);
 export let initialized = false;
 export let calibrated = false;
 let calibratedConversionRatio = null;
+
+let eyeDeviations = new CBuffer(5000);
+let previousResult = [0/*left eye*/, 0/*right eye*/, 0.0/*distance*/];
 
 let lastImage = {
     width: null,
@@ -53,6 +55,7 @@ export const initialize = async () => {
 
     await faceapi.nets.ssdMobilenetv1.loadFromUri("/assets/weights");
     await faceapi.nets.faceLandmark68Net.loadFromUri("/assets/weights");
+    await faceapi.nets.tinyFaceDetector.loadFromUri("/assets/weights");
     
     await fetch("https://raw.githubusercontent.com/nenadmarkus/pico/c2e81f9d23cc11d1a612fd21e4f9de0921a5d0d9/rnt/cascades/facefinder").then(function(response) {
         response.arrayBuffer().then(buffer => picoHelper.facefinder_classify_region = pico.pico.unpack_cascade(new Int8Array(buffer)));
@@ -81,7 +84,7 @@ export const update = async (imageData) => {
     // For faceapi.js (facial feature tracking), the input needs to be passed as an tf.tensor3d
     let inputTensor = faceapi.tf.browser.fromPixels(imageData);
 
-    let faceLandmarksResults = await faceapi.detectSingleFace(inputTensor).withFaceLandmarks();
+    let faceLandmarksResults = await faceapi.detectSingleFace(inputTensor, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
     inputTensor.dispose();
     if (!faceLandmarksResults) {
         console.debug("No face was detected by the faceapi.js library!");
@@ -123,10 +126,22 @@ export const update = async (imageData) => {
             return false;
         }
         
-        if (bestDet[3] <= 50.0) {
+        if (bestDet[3] <= 35.0) {
             console.debug("Couldn't detect reliable faces from lploc!");
             lastImageTracking.successful = false;
             return false;
+        }
+
+        // Left eye sides tracking
+        {
+            lastImageTracking.leftEye.leftSide = vec2.fromValues(faceLandmarksResults.landmarks.getLeftEye()[0].x, faceLandmarksResults.landmarks.getLeftEye()[0].y);
+            lastImageTracking.leftEye.rightSide = vec2.fromValues(faceLandmarksResults.landmarks.getLeftEye()[3].x, faceLandmarksResults.landmarks.getLeftEye()[3].y);
+        }
+
+        // Right eye sides tracking
+        {
+            lastImageTracking.rightEye.leftSide = vec2.fromValues(faceLandmarksResults.landmarks.getRightEye()[0].x, faceLandmarksResults.landmarks.getRightEye()[0].y);
+            lastImageTracking.rightEye.rightSide = vec2.fromValues(faceLandmarksResults.landmarks.getRightEye()[3].x, faceLandmarksResults.landmarks.getRightEye()[3].y);
         }
 
         // Left pupil tracking
@@ -154,18 +169,29 @@ export const update = async (imageData) => {
                 return false;
             }
         }
-    }
 
-    // Left eye sides tracking
-    {
-        lastImageTracking.leftEye.leftSide = vec2.fromValues(faceLandmarksResults.landmarks.getLeftEye()[0].x, faceLandmarksResults.landmarks.getLeftEye()[0].y);
-        lastImageTracking.leftEye.rightSide = vec2.fromValues(faceLandmarksResults.landmarks.getLeftEye()[3].x, faceLandmarksResults.landmarks.getLeftEye()[3].y);
-    }
+        if (calibrated) {
+            let leftEyeSidesLength = vec2.dist(lastImageTracking.leftEye.leftSide, lastImageTracking.leftEye.rightSide);
+            let leftEyePupilOffset = vec2.dist(lastImageTracking.leftEye.leftSide, lastImageTracking.leftEye.pupil);
+            let leftEyePupilPercentage = leftEyeSidesLength / leftEyePupilOffset;
 
-    // Right eye sides tracking
-    {
-        lastImageTracking.rightEye.leftSide = vec2.fromValues(faceLandmarksResults.landmarks.getRightEye()[0].x, faceLandmarksResults.landmarks.getRightEye()[0].y);
-        lastImageTracking.rightEye.rightSide = vec2.fromValues(faceLandmarksResults.landmarks.getRightEye()[3].x, faceLandmarksResults.landmarks.getRightEye()[3].y);
+            let rightEyeSidesLength = vec2.dist(lastImageTracking.rightEye.leftSide, lastImageTracking.rightEye.rightSide);
+            let rightEyePupilOffset = vec2.dist(lastImageTracking.rightEye.leftSide, lastImageTracking.rightEye.pupil);
+            let rightEyePupilPercentage = rightEyeSidesLength / rightEyePupilOffset;
+
+            let currResult = [leftEyePupilPercentage, rightEyePupilPercentage, getDistanceBetweenEyesInPixels()];
+
+            if (previousResult[2] != 0.0) {
+                let eyeDeviation = [0, 0];
+                let distanceDifferenceBetweenResults = currResult[2] - previousResult[2];
+                for (let eye=0; eye<2; eye++) {
+                    let pupilMovementBetweenResults = currResult[eye] - previousResult[eye];
+                    eyeDeviation[eye] = pupilMovementBetweenResults / distanceDifferenceBetweenResults;
+                }
+                eyeDeviations.push(eyeDeviation);
+            }
+            previousResult = currResult;
+        }
     }
 
     lastImageTracking.successful = true;
@@ -197,7 +223,10 @@ export const getDistanceInCm = () => {
 }
 
 export const isLookingCrossEyed = () => {
-    // todo: See if cross-eyed component is actually feasible enough to stop the tracking
+    if (eyeDeviations.size < 20) {
+        return false;
+    }
+
     return false;
 }
 
@@ -285,4 +314,13 @@ export const drawDebugImage = () => {
         ctx.stroke();
     }
     return ctx.getImageData(0, 0, lastImage.width, lastImage.height);
+}
+
+export const getDeviationChartData = () => {
+    if (eyeDeviations.length == 0) return [0, 0];
+    return eyeDeviations.last();
+}
+
+export const getDeviationChartSize = () => {
+    return eyeDeviations.length;
 }
