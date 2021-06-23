@@ -4,10 +4,9 @@ import * as materialize from "react-materialize";
 import "./Exercise.css";
 import * as faceTracking from "./../api/faceTracking";
 import {get, set} from "idb-keyval";
-import { Line } from "react-chartjs-2";
 
-export default Exercise => {  
-    let calibrationOrExercise = "calibration";
+const Exercise = () => {
+    //let calibrationOrExercise = "calibration"; // UNUSED
     let chart = useRef();
 
     console.warn("Rendered the exercise!");
@@ -111,7 +110,7 @@ export default Exercise => {
 
     useEffect(() => {
         let video = document.getElementById("calibrationVideo");
-        let canvas = document.getElementById("calibrationCanvas");
+        //let canvas = document.getElementById("calibrationCanvas"); // UNUSED
         // video.play();
     
         if (!navigator.mediaDevices) {
@@ -127,13 +126,13 @@ export default Exercise => {
     });
 
     if (!faceTracking.isCalibrated()) {
-        calibrationOrExercise = "calibration";
+        //calibrationOrExercise = "calibration"; // UNUSED
         return (
             <div className="exercise-container">
                 <h2>Calibratie Stap</h2>
                 <div id="faceTracking" style={{height: "30em"}}>
-                    <img id="calibrationFaceBorderGray" src="/assets/face-border-gray.svg" hidden></img>
-                    <img id="calibrationFaceBorderGreen" src="/assets/face-border-green.svg" hidden></img>
+                    <img id="calibrationFaceBorderGray" src="/assets/face-border-gray.svg" alt="border-gray" hidden></img>
+                    <img id="calibrationFaceBorderGreen" src="/assets/face-border-green.svg" alt="border-green" hidden></img>
                     <video id="calibrationVideo" onCanPlay={() => initializeTrackingVideo()} hidden></video>
                     {/* <video controls loop id="calibrationVideo" onCanPlay={() => initializeTrackingVideo()} src="/scheel-kijk-video.mp4" hidden></video> */}
                     <canvas id="calibrationCanvas" style={{width: "100%"}}></canvas>
@@ -154,15 +153,15 @@ export default Exercise => {
         );
     }
     else {
-        calibrationOrExercise = "exercise";
+        //calibrationOrExercise = "exercise"; // UNUSED
         return (
             <div className="exercise-container">
                 <span>
                     <materialize.Button onClick={() => {faceTracking.recalibrate(); window.location.reload();}} style={{float: "right", fontSize: "0.6em"}}>{faceTracking.isCalibrated() ? "Hercalibreren" : "Calibreer Nu!"}</materialize.Button>
                 </span>
                 <div id="faceTracking">
-                    <img id="calibrationFaceBorderGray" src="/assets/face-border-gray.svg" hidden></img>
-                    <img id="calibrationFaceBorderGreen" src="/assets/face-border-green.svg" hidden></img>
+                    <img id="calibrationFaceBorderGray" src="/assets/face-border-gray.svg" alt="border-gray" hidden></img>
+                    <img id="calibrationFaceBorderGreen" src="/assets/face-border-green.svg" alt="border-green" hidden></img>
                     <video id="calibrationVideo" onCanPlay={() => initializeTrackingVideo()} hidden></video>
                     {/* <video controls loop muted id="calibrationVideo" onCanPlay={() => initializeTrackingVideo()} src="/scheel-kijk.mp4" hidden></video> */}
                     <canvas id="calibrationCanvas" style={{width: "100%"}} hidden></canvas>
@@ -170,8 +169,8 @@ export default Exercise => {
                 </div>
                 <div>
                     <h2>Houd de telefoon op een armslengte afstand recht voor je.</h2>
-                    <h3 id="headPositionWarning" style={{color: "darkblue"}} style={{opacity: 0.0, transition: "opacity 0.5s", transitionDelay: "1s"}}>Zorg dat je jouw mobiel recht voor je gezicht houd!</h3>
-                    <h3 id="headObscuredWarning" style={{color: "darkblue"}} style={{opacity: 0.0, transition: "opacity 0.5s", transitionDelay: "1s"}}>Zorg dat je geen bril op hebt of iets wat je gezicht verbergt!</h3>
+                    <h3 id="headPositionWarning" style={{color: "darkblue", opacity: 0.0, transition: "opacity 0.5s", transitionDelay: "1s"}}>Zorg dat je jouw mobiel recht voor je gezicht houd!</h3>
+                    <h3 id="headObscuredWarning" style={{color: "darkblue", opacity: 0.0, transition: "opacity 0.5s", transitionDelay: "1s"}}>Zorg dat je geen bril op hebt of iets wat je gezicht verbergt!</h3>
                     <materialize.Button onClick={() => finishExercise()}>Ik kijk foutief</materialize.Button>
                 </div>
                 {/* <Line id="graph" ref={chart} data={{labels: [0], datasets:[
@@ -182,3 +181,4 @@ export default Exercise => {
         );
     }
 }
+export default Exercise;

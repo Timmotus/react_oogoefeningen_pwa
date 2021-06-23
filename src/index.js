@@ -40,7 +40,7 @@ get('connectId')
     .catch(() => console.log('Failed to set-up connectId storage.'));
 
 // Setup Timer
-const timer = setInterval(
+setInterval(
     async () => {
         const timer = await get ('timer');
         if (timer.time > 0)

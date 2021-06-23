@@ -50,7 +50,7 @@ let picoHelper = {
 };
 
 export const initialize = async () => {
-    calibrated = window.localStorage.getItem("calibrated-conversion-ratio") != null && parseFloat(window.localStorage.getItem("calibrated-conversion-ratio")) != NaN;
+    calibrated = window.localStorage.getItem("calibrated-conversion-ratio") != null && !isNaN(parseFloat(window.localStorage.getItem("calibrated-conversion-ratio")));
     calibratedConversionRatio = window.localStorage.getItem("calibrated-conversion-ratio") == null ? 0 : parseFloat(window.localStorage.getItem("calibrated-conversion-ratio"));
 
     await faceapi.nets.ssdMobilenetv1.loadFromUri("/assets/weights");
@@ -133,16 +133,16 @@ export const update = async (imageData) => {
         }
 
         // Left eye sides tracking
-        {
+
             lastImageTracking.leftEye.leftSide = vec2.fromValues(faceLandmarksResults.landmarks.getLeftEye()[0].x, faceLandmarksResults.landmarks.getLeftEye()[0].y);
             lastImageTracking.leftEye.rightSide = vec2.fromValues(faceLandmarksResults.landmarks.getLeftEye()[3].x, faceLandmarksResults.landmarks.getLeftEye()[3].y);
-        }
+
 
         // Right eye sides tracking
-        {
+
             lastImageTracking.rightEye.leftSide = vec2.fromValues(faceLandmarksResults.landmarks.getRightEye()[0].x, faceLandmarksResults.landmarks.getRightEye()[0].y);
             lastImageTracking.rightEye.rightSide = vec2.fromValues(faceLandmarksResults.landmarks.getRightEye()[3].x, faceLandmarksResults.landmarks.getRightEye()[3].y);
-        }
+
 
         // Left pupil tracking
         {
@@ -181,7 +181,7 @@ export const update = async (imageData) => {
 
             let currResult = [leftEyePupilPercentage, rightEyePupilPercentage, getDistanceBetweenEyesInPixels()];
 
-            if (previousResult[2] != 0.0) {
+            if (previousResult[2] !== 0.0) {
                 let eyeDeviation = [0, 0];
                 let distanceDifferenceBetweenResults = currResult[2] - previousResult[2];
                 for (let eye=0; eye<2; eye++) {
@@ -317,7 +317,7 @@ export const drawDebugImage = () => {
 }
 
 export const getDeviationChartData = () => {
-    if (eyeDeviations.length == 0) return [0, 0];
+    if (eyeDeviations.length === 0) return [0, 0];
     return eyeDeviations.last();
 }
 

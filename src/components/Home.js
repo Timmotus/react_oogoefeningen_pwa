@@ -15,7 +15,7 @@ const Home = () => {
                 <h1>Welkom!</h1>
                 <span>Er staan oefeningen voor je klaar!</span>
                 <button onClick={async () => { await set('timer', {
-                    time: 10,
+                    time: 30, // DELAY voor exercises achter elkaar
                     last_update: Date.now()
                 }); window.location.href = '/exercise'}}><i className="material-icons">play_arrow</i>Start<i/></button>
                 <NavBar/>
@@ -41,7 +41,7 @@ const Home = () => {
         setTime(value.time);
     };
 
-    const timer = setInterval(updateTime, 1000);
+    setInterval(updateTime, 1000);
 
     updateTime();
     if (time > 0) return wait();
