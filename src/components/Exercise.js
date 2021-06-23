@@ -96,12 +96,13 @@ export default Exercise => {
             const dist = faceTracking.getDistanceInCm();
 
             addHistory(dist).then(() => {
-                // get('exersiceId').then(value => {
-                //     fetch('https://oogzorg-backend.herokuapp.com/api/result', {
-                //         method: 'POST',
-                //         body: JSON.stringify({exerciseId: value, date: Date.toLocaleString(), cm: dist})
-                //     });
-                // });
+                get('connectId').then(value => {
+                    if (value !== null)
+                        fetch('https://oogzorg-backend.herokuapp.com/api/result', {
+                            method: 'POST',
+                            body: JSON.stringify({exerciseId: value, date: Date.toLocaleString(), cm: dist})
+                        });
+                });
             }).finally(() => {
                 window.location.href = "/progress?data=" + dist;
             });
