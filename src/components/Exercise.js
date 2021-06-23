@@ -145,9 +145,9 @@ const Exercise = () => {
                     }}>Volgende Stap</materialize.Button>
                 </div>
                 <div id="step2" hidden>
+                    <materialize.Button onClick={() => finishCalibration()}>Calibreer</materialize.Button>
                     <h2>Probeer nu je gezicht op ongeveer 50cm afstand te plaatsen. Klik daarna op de Calibreer knop.</h2>
                     <h3>Gebruik (voor betere precisie) hiervoor een lange liniaal, meetlint of rolmaat.</h3>
-                    <materialize.Button onClick={() => finishCalibration()}>Calibreer</materialize.Button>
                 </div>
             </div>
         );
