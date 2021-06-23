@@ -1,0 +1,63 @@
+.profile-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-content: center;
+    align-items: center;
+
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    background-color: transparent;
+}
+.profile-history-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow: hidden;
+    overflow-y: scroll;
+    max-height: 35vh;
+}
+.koppel-content {
+    display: grid;
+    grid-template-areas:
+        "code code"
+        "btn1 btn2";
+    grid-row-gap: 1em;
+}
+.koppel-code {
+    grid-area: code;
+    font-size: 6vw;
+}
+
+.btn-koppel {
+    color: #fff;
+    font-size: 6vw;
+    padding: .2em;
+    margin: .3em auto 0;
+
+    border: none;
+    border-radius: .3em;
+    box-shadow: 0 .1em #0f212a;
+    background-color: #1b3642;
+    transition: .2s;
+}
+.btn-koppel:hover {
+    cursor: pointer;
+    background-color: #294e5e;
+}
+
+.btn-koppel:active {
+    cursor: pointer;
+    box-shadow: none;
+    transition: 0s;
+    transform: translateY(10%) scale(0.95);
+    background-color: #294e5e;
+}
+.btn-1 {
+    grid-area: btn1;
+}
+.btn-2 {
+    grid-area: btn2;
+}
+li {
+    font-size: 6vw;
+}

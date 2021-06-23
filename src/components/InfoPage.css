@@ -1,0 +1,61 @@
+.info-wrapper {
+    display: grid;
+    grid-template-rows: 1fr 9fr 1fr;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    background-color: #fff;
+    color: black;
+}
+
+.carousel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.carousel-panel > img {
+    height: 40vh;
+}
+
+.carousel-panel > h1 {
+
+}
+
+.carousel-panel > p {
+    text-transform: none;
+    margin: 0;
+}
+
+.carousel-panel {
+    display: block;
+    width: 80%;
+    position: absolute;
+}
+
+.carousel-controls {
+    display: grid;
+    grid-template-columns: 1fr 8fr 1fr;
+}
+
+.carousel-controls > span {
+    margin: 0 2em;
+}
+
+.indicators {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.indicator {
+    width: 1em;
+    height: 1em;
+    border-radius: 100%;
+    border: 1px solid #000;
+}
+
+.indicator.active {
+    background-color: #000;
+}
