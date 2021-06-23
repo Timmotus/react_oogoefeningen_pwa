@@ -1,6 +1,6 @@
 {
-  "name": "Weather App PWA",
-  "short_name": "Weather App",
+  "name": "Convergentie Insuffientie Oefen-Applicatie",
+  "short_name": "CI Oefen App",
   "icons": [
     {
       "src": "icons/manifest-icon-192.png",
