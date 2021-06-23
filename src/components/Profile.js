@@ -37,18 +37,18 @@ const Profile = () => {
             return (
                 <ul className="profile-history-list">
                     {history.results.map(result => (
-                        <li>{result.date_time}: {result.data}</li>
+                        <li>{result.date_time}: {Math.round(result.data)}cm</li>
                     ))}
                 </ul>
             );
     }
 
     const connect_render = () => {
-        if (connectId == null)
+        if (connectId == null || connectId === "")
             return (
-                <div>
-                    <span id='koppel-code'>Geen koppel-code in gebruik.</span>
-                    <button id="koppel-btn" onClick={ () => {
+                <div className="koppel-content">
+                    <span className="koppel-code" id='koppel-code'>Geen koppel-code in gebruik.</span>
+                    <button className="btn-koppel btn-1" id="koppel-btn" onClick={ () => {
                         document.querySelector('#koppel-div').hidden = false;
                         document.querySelector('#koppel-btn').hidden = true;
                         var video = document.createElement("video");
@@ -113,10 +113,10 @@ const Profile = () => {
                             }
                     }}>Ontvang koppel-code</button>
                     <div id="koppel-div" hidden>
-                        <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div>
+                        <div id="loadingMessage">🎥 Geen toegang tot de videostream (zorgt dat de app camera toegang heeft!)</div>
                         <canvas width="100" height="100" id="canvas" hidden></canvas>
                         <div id="output" hidden>
-                            <div id="outputMessage">No QR code detected.</div>
+                            <div id="outputMessage">Geen QR code detected.</div>
                             <div hidden><b>Data:</b><span id="outputData"></span></div>
                         </div>
                     </div>
@@ -124,13 +124,13 @@ const Profile = () => {
             );
         else
             return (
-                <div>
-                    <span id='koppel-code'>Koppel code: {connectId}</span>
-                    <button onClick={() => {
+                <div className="koppel-content">
+                    <span className="koppel-code" id='koppel-code'>Gekoppelde code: {connectId}</span>
+                    <button className="btn-koppel btn-1" onClick={() => {
                         set('connectId', null).then();
                         setConnectId(null);
                     }}>Nieuwe Code</button>
-                    <button id='koppel-share' onClick={() => {
+                    <button className="btn-koppel btn-2" id='koppel-share' onClick={() => {
                         history.results.forEach(result => {
                             fetch('https://oogzorg-backend.herokuapp.com/api/result', {
                                 method: 'POST',

@@ -97,7 +97,7 @@ export default Exercise => {
 
             addHistory(dist).then(() => {
                 get('connectId').then(value => {
-                    if (value !== null)
+                    if (value !== null && value !== "")
                         fetch('https://oogzorg-backend.herokuapp.com/api/result', {
                             method: 'POST',
                             body: JSON.stringify({exerciseId: value, date: Date.toLocaleString(), cm: dist})
