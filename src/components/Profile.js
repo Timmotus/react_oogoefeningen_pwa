@@ -78,7 +78,7 @@ const Profile = () => {
                             });
 
                             function tick() {
-                                loadingMessage.innerText = "⌛ Loading video..."
+                                loadingMessage.innerText = "⌛ Webcam aan het opstarten..."
                                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                                     loadingMessage.hidden = true;
                                     canvasElement.hidden = false;
@@ -100,7 +100,10 @@ const Profile = () => {
                                         outputData.parentElement.hidden = false;
                                         outputData.innerText = code.data;
                                         setConnectId(code.data);
-                                        set('connectId', code.data).finally(() => continue_scan = false);
+                                        set('connectId', code.data).finally(() => {
+                                            continue_scan = false;
+                                            window.location.reload();
+                                        });
                                     } else {
                                         outputMessage.hidden = false;
                                         outputData.parentElement.hidden = true;
@@ -113,10 +116,10 @@ const Profile = () => {
                             }
                     }}>Ontvang koppel-code</button>
                     <div id="koppel-div" hidden>
-                        <div id="loadingMessage">🎥 Geen toegang tot de videostream (zorgt dat de app camera toegang heeft!)</div>
+                        <div id="loadingMessage">🎥 Geen toegang tot de videostream (zorgt dat je de app toegang geeft tot je camera!)</div>
                         <canvas width="100" height="100" id="canvas" hidden></canvas>
                         <div id="output" hidden>
-                            <div id="outputMessage">Geen QR code detected.</div>
+                            <div id="outputMessage">Geen QR code gedetecteerd.</div>
                             <div hidden><b>Data:</b><span id="outputData"></span></div>
                         </div>
                     </div>
@@ -129,15 +132,15 @@ const Profile = () => {
                     <button className="btn-koppel btn-1" onClick={() => {
                         set('connectId', null).then();
                         setConnectId(null);
-                    }}>Nieuwe Code</button>
-                    <button className="btn-koppel btn-2" id='koppel-share' onClick={() => {
+                    }}>Verwijder Koppeling</button>
+                    {/* <button className="btn-koppel btn-2" id='koppel-share' onClick={() => {
                         history.results.forEach(result => {
                             fetch('https://oogzorg-backend.herokuapp.com/api/result', {
                                 method: 'POST',
                                 body: JSON.stringify({ exerciseId: connectId, date: result.date, cm: result.data })
                             }).then(res => console.log(res));
                         });
-                    }}>Deel Resultaten</button>
+                    }}>Deel Resultaten</button> */}
                 </div>
             );
     }

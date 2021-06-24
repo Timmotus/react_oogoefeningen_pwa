@@ -4,12 +4,10 @@ import * as materialize from "react-materialize";
 import "./Exercise.css";
 import * as faceTracking from "./../api/faceTracking";
 import {get, set} from "idb-keyval";
+const dateFormat = require("dateformat");
 
 const Exercise = () => {
-    //let calibrationOrExercise = "calibration"; // UNUSED
     let chart = useRef();
-
-    console.warn("Rendered the exercise!");
 
     let trackingInitPromise = faceTracking.initialize();
 
@@ -90,22 +88,31 @@ const Exercise = () => {
     }
 
     function finishExercise() {
-        if (faceTracking.isCentered() && faceTracking.isLastUpdateSuccessful()) {
+        // if (faceTracking.isCentered() && faceTracking.isLastUpdateSuccessful()) {
             console.log("Finished exercise!");
-            const dist = faceTracking.getDistanceInCm();
+            const dist = 30;
 
             addHistory(dist).then(() => {
                 get('connectId').then(value => {
-                    if (value !== null && value !== "")
+                    if (value !== null && value !== "") {
+                        let date = new Date();
+                        let dateString = dateFormat(date, "dd-mm-yyyy HH:MM:ss");
                         fetch('https://oogzorg-backend.herokuapp.com/api/result', {
                             method: 'POST',
-                            body: JSON.stringify({exerciseId: value, date: Date.toLocaleString(), cm: dist})
+                            body: JSON.stringify({exerciseId: value, date: dateString, cm: parseFloat(dist)}),
+                            headers: {"Content-Type": "application/json"}
+                        }).then(res => {
+                            window.location.href = "/progress?data=" + dist;
                         });
+                    }
+                    else {
+                        window.location.href = "/progress?data=" + dist;
+                    }
                 });
             }).finally(() => {
-                window.location.href = "/progress?data=" + dist;
+                
             });
-        }
+        //}
     }
 
     useEffect(() => {
@@ -126,7 +133,6 @@ const Exercise = () => {
     });
 
     if (!faceTracking.isCalibrated()) {
-        //calibrationOrExercise = "calibration"; // UNUSED
         return (
             <div className="exercise-container">
                 <h2>Calibratie Stap</h2>
@@ -153,7 +159,6 @@ const Exercise = () => {
         );
     }
     else {
-        //calibrationOrExercise = "exercise"; // UNUSED
         return (
             <div className="exercise-container">
                 <span>
