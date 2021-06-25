@@ -5,6 +5,7 @@ import "./Exercise.css";
 import * as faceTracking from "./../api/faceTracking";
 import {get, set} from "idb-keyval";
 const dateFormat = require("dateformat");
+import {REST_URL} from "../config";
 
 const Exercise = () => {
     let chart = useRef();
@@ -97,7 +98,7 @@ const Exercise = () => {
                     if (value !== null && value !== "") {
                         let date = new Date();
                         let dateString = dateFormat(date, "dd-mm-yyyy HH:MM:ss");
-                        fetch('https://oogzorg-backend.herokuapp.com/api/result', {
+                        fetch(`${REST_URL}/api/result`, {
                             method: 'POST',
                             body: JSON.stringify({exerciseId: value, date: dateString, cm: parseFloat(dist)}),
                             headers: {"Content-Type": "application/json"}

@@ -1,0 +1,1 @@
+export const REST_URL = "https://oogzorg-backend.herokuapp.com";

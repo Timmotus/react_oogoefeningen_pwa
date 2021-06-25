@@ -4,6 +4,7 @@ import './Profile.css'
 import NavBar from "./NavBar";
 import {get, set} from "idb-keyval";
 import jsQR from "jsqr";
+import {REST_URL} from "../config";
 
 const Profile = () => {
 
@@ -135,7 +136,7 @@ const Profile = () => {
                     }}>Verwijder Koppeling</button>
                     {/* <button className="btn-koppel btn-2" id='koppel-share' onClick={() => {
                         history.results.forEach(result => {
-                            fetch('https://oogzorg-backend.herokuapp.com/api/result', {
+                            fetch(`${REST_URL}/api/result`, {
                                 method: 'POST',
                                 body: JSON.stringify({ exerciseId: connectId, date: result.date, cm: result.data })
                             }).then(res => console.log(res));
